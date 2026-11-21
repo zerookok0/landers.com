@@ -11,3 +11,6 @@ raw/
 .DS_Store
 Thumbs.db
 .shots/
+
+# 临时实拍目录
+preview-live/
