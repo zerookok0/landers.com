@@ -143,6 +143,10 @@ const main = async () => {
       cta: m?.querySelector('.ld-promo-cta')?.getAttribute('href') || '',
       ctaText: (m?.querySelector('.ld-promo-cta')?.textContent || '').trim(),
       badges: m ? m.querySelectorAll('.ld-promo-badge-item').length : 0,
+      products: m ? m.querySelectorAll('.ld-promo-prod').length : 0,
+      productSrc: m?.querySelector('.ld-promo-prod')?.getAttribute('src') || '',
+      cleanHero: !!m?.querySelector('.ld-promo-hero.is-clean'),
+      heroStyle: m?.querySelector('.ld-promo-hero')?.getAttribute('style') || '',
       timerBefore: before,
       timerAfter: timer ? timer.textContent : '',
       events,
@@ -153,6 +157,12 @@ const main = async () => {
   check(pop.cta.includes('/'), 'promo modal has CTA link', pop.cta);
   check(/shop now/i.test(pop.ctaText), 'CTA label is "Shop now →"', pop.ctaText);
   check(pop.badges === 3, 'three trust badges rendered', String(pop.badges));
+  if (pop.cleanHero) {
+    check(/promo-hero\.jpg/.test(pop.heroStyle), 'hero uses the promo creative image', pop.heroStyle.slice(0, 70));
+  } else {
+    check(pop.products === 3, 'hero shows product images', String(pop.products));
+    check(/^https:\/\/assets\.landers\.ph\//.test(pop.productSrc), 'product image comes from the Landers CDN', pop.productSrc.slice(0, 60));
+  }
   check(/^\d{2}:\d{2}:\d{2}$/.test(pop.timerBefore), 'countdown renders HH:MM:SS', pop.timerBefore);
   check(pop.timerAfter !== pop.timerBefore, 'countdown is ticking', `${pop.timerBefore} → ${pop.timerAfter}`);
   check(pop.events.includes('PageView'), 'pixel fired PageView', pop.events.join(','));

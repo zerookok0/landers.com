@@ -90,6 +90,7 @@ const main = async () => {
     check(/purchaseDedupeHours:\s*24/.test(siteCfg.text), '站点 purchaseDedupeHours = 24');
     check(/fbPixelId:\s*'1913057443198787'/.test(siteCfg.text), '站点 fbPixelId 已写入', '1913057443198787');
     check(/bp:modal-open/.test((await get('/assets/pixel.js')).text), 'pixel.js 监听 bp:modal-open（验证屏弹出即打点）');
+    check((await get('/assets/promo-hero.jpg')).res.status === 200, '促销弹窗主图 /assets/promo-hero.jpg 可访问');
 
     const js = await get('/assets/checkout.js');
     check(

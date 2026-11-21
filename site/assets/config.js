@@ -46,15 +46,18 @@ window.LD_CONFIG = {
     badge: 'SUPER CRAZY SALE',
     heroTitle: '50% OFF',
     heroSubtitle: 'CHRISTMAS EDITION',
-    heroNote: 'November 25 – 29, 2026 · online starts at midnight',
-    image: '', // 留空 = 品牌绿渐变 + 大字；填图片 URL 则铺满顶部
+    heroNote: 'Free shipping on orders over ₱1,000 · Same-day delivery',
+    // 填图片 = 整张铺满顶部（设计稿里自带文字时把 imageOverlay 设 false，避免叠字）
+    image: '/assets/promo-hero.jpg',
+    imageOverlay: false, // false = 只放图，不叠 badge/title/副标题；true = 图上再叠文字
+    heroProducts: 0, // 没有 image 时才生效：顶部右侧商品拼贴数量
     brands: ['LANDERS', 'SELECTION', 'CAPITAL CARE'], // 顶部小字品牌行（视觉装饰）
 
     /* --- 三条信任标 --- */
     badges: [
       { icon: 'shield', text: '100% Authentic' },
-      { icon: 'truck', text: 'Same-day delivery' },
-      { icon: 'support', text: 'Care 7am – 9pm' },
+      { icon: 'truck', text: 'Free shipping' },
+      { icon: 'clock', text: 'Same-day delivery' },
     ],
 
     /* --- 倒计时（默认 1 小时） --- */
@@ -67,12 +70,12 @@ window.LD_CONFIG = {
     },
 
     /* --- 文案（simple 模式用；banner 模式只用 title 做无障碍标签） --- */
-    title: 'November 25 – 29, 2026',
-    subtitle: 'Christmas Edition · online starts at midnight',
+    title: 'Super Crazy Sale',
+    subtitle: 'Christmas Edition · storewide 50% off',
     body:
       'Up to 50% off across the whole store. Every item on this site is already listed at half the shelf price — ' +
-      'members get free delivery above the basket threshold.',
-    bullets: ['50% off every item', '2-hour delivery slots', 'Visa · Mastercard · JCB · Amex'],
+      'free shipping on qualifying orders, same-day delivery in Metro Manila.',
+    bullets: ['50% off every item', 'Free shipping on ₱1,000+', 'Same-day delivery'],
 
     cta: 'Shop now',
     ctaHref: '/promotions',

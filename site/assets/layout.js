@@ -228,6 +228,8 @@
       '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 6h11v9H3V6zm12 3h3.6l2.4 3.2V15h-6V9zM7 18.5a1.7 1.7 0 1 1 0-3.4 1.7 1.7 0 0 1 0 3.4zm10 0a1.7 1.7 0 1 1 0-3.4 1.7 1.7 0 0 1 0 3.4z"/></svg>',
     support:
       '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3a7 7 0 0 0-7 7v4a3 3 0 0 0 3 3h1v-8H7v-2a5 5 0 0 1 10 0v2h-2v8h1a3 3 0 0 0 3-3v-4a7 7 0 0 0-7-7zm-3 15v2h6v-2H9z"/></svg>',
+    clock:
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5v5.6l4.2 2.5-.9 1.5-5.3-3.2V7h2z"/></svg>',
     gift:
       '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 8h-3.2a3 3 0 0 0-4.8-3.6A3 3 0 0 0 7.2 8H4v4h1v9h14v-9h1V8zM10 5.5A1.5 1.5 0 1 1 11.5 7H10V5.5zm4 0V7h-1.5A1.5 1.5 0 1 1 14 5.5zM10 19v-7H7v7h3zm7 0v-7h-3v7h3z"/></svg>',
     tag:
@@ -240,7 +242,7 @@
     return `${pad2(Math.floor(total / 3600))}:${pad2(Math.floor((total % 3600) / 60))}:${pad2(total % 60)}`;
   };
 
-  function buildPromoModal() {
+  async function buildPromoModal() {
     const m = CFG.promoModal || {};
     if (!m.enabled) return;
     const page = document.body.dataset.page || '';
@@ -261,20 +263,51 @@
     const cdDuration = Number(cd.durationMs || 3600000);
     const cdLabel = cd.label || 'Offer ends in';
 
-    const mediaStyle = m.image ? ` style="background-image:url('${m.image}')"` : '';
+    /* 顶部商品拼贴：image 留空时才取商品图（数量由 heroProducts 控制） */
+    let products = [];
+    const wantProducts = !m.image && Number(m.heroProducts || 0) > 0;
+    if (wantProducts) {
+      try {
+        const home = await (await fetch('/data/home.json')).json();
+        const rail = (home.rails || []).find((r) => Array.isArray(r.items) && r.items.length) || { items: [] };
+        products = rail.items.filter((p) => p && p.img).slice(0, Number(m.heroProducts));
+      } catch (e) {
+        products = [];
+      }
+    }
 
-    const heroBlock = `
-      <div class="ld-promo-hero${m.image ? ' has-img' : ''}"${mediaStyle}>
+    const mediaStyle = m.image ? ` style="background-image:url('${m.image}')"` : '';
+    const cleanHero = Boolean(m.image) && m.imageOverlay === false;
+    const productBlock = products.length
+      ? `<div class="ld-promo-products" aria-hidden="true">
+           ${products
+             .map(
+               (p, i) =>
+                 `<img src="${p.img}" alt="" loading="eager" class="ld-promo-prod ld-promo-prod-${i}">`
+             )
+             .join('')}
+         </div>`
+      : '';
+
+    const heroBlock = cleanHero
+      ? `<div class="ld-promo-hero has-img is-clean"${mediaStyle}>
+           <span class="ld-sr-only" id="ld-modal-title">${m.heroTitle || '50% OFF'}</span>
+         </div>`
+      : `
+      <div class="ld-promo-hero${m.image ? ' has-img' : ''}${products.length ? ' has-products' : ''}"${mediaStyle}>
         <div class="ld-promo-hero-inner">
-          ${m.badge ? `<span class="ld-promo-kicker">${m.badge}</span>` : ''}
-          <div class="ld-promo-title" id="ld-modal-title">${m.heroTitle || '50% OFF'}</div>
-          ${m.heroSubtitle ? `<div class="ld-promo-sub">${m.heroSubtitle}</div>` : ''}
-          ${
-            Array.isArray(m.brands) && m.brands.length
-              ? `<div class="ld-promo-brands">${m.brands.map((b) => `<span>${b}</span>`).join('')}</div>`
-              : ''
-          }
-          ${m.heroNote ? `<div class="ld-promo-note">${m.heroNote}</div>` : ''}
+          <div class="ld-promo-copy">
+            ${m.badge ? `<span class="ld-promo-kicker">${m.badge}</span>` : ''}
+            <div class="ld-promo-title" id="ld-modal-title">${m.heroTitle || '50% OFF'}</div>
+            ${m.heroSubtitle ? `<div class="ld-promo-sub">${m.heroSubtitle}</div>` : ''}
+            ${
+              Array.isArray(m.brands) && m.brands.length
+                ? `<div class="ld-promo-brands">${m.brands.map((b) => `<span>${b}</span>`).join('')}</div>`
+                : ''
+            }
+            ${m.heroNote ? `<div class="ld-promo-note">${m.heroNote}</div>` : ''}
+          </div>
+          ${productBlock}
         </div>
       </div>`;
 

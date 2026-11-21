@@ -226,6 +226,9 @@ button.ld-loc:hover { color: var(--green-dark); }
   color: #fff;
 }
 .ld-promo-hero.has-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.38)); }
+.ld-promo-hero.is-clean { aspect-ratio: 1 / 1; background-size: cover; background-position: center; }
+.ld-promo-hero.is-clean::after { display: none; }
+.ld-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .ld-promo-hero-inner { position: relative; z-index: 1; width: 100%; padding: 26px 22px 20px; text-align: center; }
 .ld-promo-kicker { display: inline-block; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.9px; padding: 5px 10px; border-radius: 6px; text-transform: uppercase; }
 .ld-promo-title { margin: 12px 0 2px; font-size: 62px; line-height: 0.92; font-weight: 900; letter-spacing: -2px; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.1), 0 10px 24px rgba(0, 0, 0, 0.28); }
@@ -233,6 +236,18 @@ button.ld-loc:hover { color: var(--green-dark); }
 .ld-promo-brands { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
 .ld-promo-brands span { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; padding: 3px 8px; border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 999px; opacity: 0.92; }
 .ld-promo-note { margin-top: 10px; font-size: 11.5px; opacity: 0.92; }
+
+/* 顶部商品拼贴（heroProducts） */
+.ld-promo-hero.has-products .ld-promo-hero-inner { display: grid; grid-template-columns: 1fr 44%; align-items: center; gap: 8px; text-align: left; padding: 20px 14px 18px 20px; }
+.ld-promo-hero.has-products .ld-promo-title { font-size: 52px; }
+.ld-promo-hero.has-products .ld-promo-brands,
+.ld-promo-hero.has-products .ld-promo-note { justify-content: flex-start; }
+.ld-promo-products { display: flex; align-items: center; justify-content: flex-end; height: 176px; }
+.ld-promo-prod { width: 92px; height: 92px; object-fit: contain; background: #fff; border-radius: 12px; padding: 6px; box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3); margin-left: -24px; }
+.ld-promo-prod:nth-child(1) { transform: rotate(-10deg) translateY(12px); z-index: 1; }
+.ld-promo-prod:nth-child(2) { transform: rotate(4deg); z-index: 2; }
+.ld-promo-prod:nth-child(3) { transform: rotate(12deg) translateY(-10px); z-index: 1; }
+.ld-promo-prod:nth-child(4) { transform: rotate(-4deg) translateY(16px); z-index: 1; width: 78px; height: 78px; }
 .ld-promo-badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 12px 10px; background: #f3f8ec; }
 .ld-promo-badge-item { display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; color: var(--green-dark); }
 .ld-promo-badge-item svg { width: 20px; height: 20px; }
@@ -464,4 +479,11 @@ button.ld-loc:hover { color: var(--green-dark); }
   .ld-promo-title { font-size: 46px; }
   .ld-promo-timer { font-size: 34px; }
   .ld-promo-badge-item em { font-size: 10px; }
+  .ld-promo-hero.has-products .ld-promo-hero-inner { grid-template-columns: 1fr; text-align: center; padding: 22px 16px 16px; }
+  .ld-promo-hero.has-products .ld-promo-brands,
+  .ld-promo-hero.has-products .ld-promo-note { justify-content: center; }
+  .ld-promo-hero.has-products .ld-promo-title { font-size: 44px; }
+  .ld-promo-products { height: auto; justify-content: center; margin-top: 6px; }
+  .ld-promo-prod { width: 68px; height: 68px; margin-left: -16px; }
+  .ld-promo-prod:first-child { margin-left: 0; }
 }

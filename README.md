@@ -65,13 +65,15 @@ window.LD_CONFIG = {
     badge: 'SUPER CRAZY SALE',
     heroTitle: '50% OFF',
     heroSubtitle: 'CHRISTMAS EDITION',
-    heroNote: 'November 25 – 29, 2026 · online starts at midnight',
-    image: '',                    // 留空 = 品牌绿渐变 + 大字；填图片 URL 就铺满顶部
+    heroNote: 'Free shipping on orders over ₱1,000 · Same-day delivery',
+    image: '/assets/promo-hero.jpg', // 填图片就整张铺满顶部（替换 site/assets/promo-hero.jpg 即可换素材）
+    imageOverlay: false,          // false = 只放图不叠字；true = 图上再叠 badge/title/副标题
+    heroProducts: 0,              // 没有 image 时才生效：右侧商品拼贴数量（0 = 不要）
     brands: ['LANDERS', 'SELECTION', 'CAPITAL CARE'],
-    badges: [                     // 三条信任标（icon: shield / truck / support / gift / tag）
+    badges: [                     // 三条信任标（icon: shield / truck / support / clock / gift / tag）
       { icon: 'shield', text: '100% Authentic' },
-      { icon: 'truck', text: 'Same-day delivery' },
-      { icon: 'support', text: 'Care 7am – 9pm' },
+      { icon: 'truck', text: 'Free shipping' },
+      { icon: 'clock', text: 'Same-day delivery' },
     ],
     countdown: {
       enabled: true,
