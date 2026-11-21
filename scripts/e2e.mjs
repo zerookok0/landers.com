@@ -168,6 +168,44 @@ const main = async () => {
   check(pop.events.includes('PageView'), 'pixel fired PageView', pop.events.join(','));
   check(pop.events.includes('AddToCart'), 'pixel fired AddToCart', pop.events.join(','));
 
+  // 弹窗响应式：手机 / 大屏手机 / 桌面 三档
+  for (const [w, h, label] of [
+    [390, 844, 'mobile 390x844'],
+    [414, 896, 'mobile 414x896'],
+    [1440, 900, 'desktop 1440x900'],
+  ]) {
+    await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: w < 500 });
+    await sleep(700);
+    const m = await evaluate(`
+      const card = document.querySelector('.ld-promo .ld-modal-card');
+      const cta = document.querySelector('.ld-promo-cta');
+      const timer = document.getElementById('ld-promo-timer');
+      if (!card || !cta) return null;
+      const r = card.getBoundingClientRect();
+      const cr = cta.getBoundingClientRect();
+      return {
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+        ctaVisible: cr.top >= 0 && cr.bottom <= window.innerHeight + 1,
+        ctaH: Math.round(cr.height),
+        timerSize: timer ? parseFloat(getComputedStyle(timer).fontSize) : 0,
+        overflowX: document.documentElement.scrollWidth > window.innerWidth + 1,
+      };
+    `);
+    if (!m) {
+      check(false, `${label}: modal still in DOM`);
+      continue;
+    }
+    check(m.w <= m.vw && !m.overflowX, `${label}: modal fits the viewport`, `${m.w}px ≤ ${m.vw}px`);
+    check(m.h <= m.vh, `${label}: modal height within screen`, `${m.h}px ≤ ${m.vh}px`);
+    check(m.ctaVisible, `${label}: CTA is above the fold`, `cta ${m.ctaH}px`);
+    check(m.timerSize >= 28 && m.timerSize <= 40, `${label}: countdown scales`, `${m.timerSize}px`);
+  }
+  await send('Emulation.clearDeviceMetricsOverride').catch(() => {});
+  await sleep(400);
+
   // 3. product page
   await evaluate(`
     const cart = JSON.parse(localStorage.getItem('ld_cart'));

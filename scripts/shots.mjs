@@ -100,6 +100,7 @@ const main = async () => {
   const closeModal = `document.querySelector('#ld-modal [data-close]')?.click(); await new Promise(r=>setTimeout(r,350)); return true;`;
 
   await shot('home-popup', 1440, 1000, BASE + '/');
+  await shot('mobile-popup', 390, 844, BASE + '/');
   await shot('home', 1440, 1250, BASE + '/', closeModal);
   await shot('category', 1440, 1250, BASE + '/c/food-cupboard.html', closeModal);
   await shot('product', 1440, 1250, `${BASE}/product.html?id=${seed.id}&cat=${seed.cat}`);

@@ -29,7 +29,8 @@
 | 页面 | 文件 |
 |---|---|
 | 首页 | `preview/home.png` |
-| 首页 + 进场弹窗 | `preview/home-popup.png` || 类目页 | `preview/category.png` |
+| 首页 + 进场弹窗 | `preview/home-popup.png` |
+| 弹窗（移动端 390） | `preview/mobile-popup.png` || 类目页 | `preview/category.png` |
 | 商品页（上下结构） | `preview/product.png` |
 | 购物车 | `preview/cart.png` |
 | 结账页 | `preview/checkout.png` |\n| 结账页·等待面板 | `preview/checkout-busy.png` |
@@ -88,6 +89,14 @@ window.LD_CONFIG = {
   },
 };
 ```
+
+### 促销弹窗（`promoModal`）
+
+- 两种版式：`layout: 'banner'`（大图 + 信任标 + 倒计时 + 整条 CTA）/ `'simple'`（纯文字卡）
+- 主视觉：`image` 填图片就整张铺满（`imageOverlay: false` 不叠字）；留空则「品牌绿渐变 + 大字 + 右侧商品拼贴（`heroProducts`）」
+- 倒计时：`countdown.durationMs` 默认 1 小时，`HH:MM:SS`，最后 5 分钟数字闪；`persist: 'session'` 本次会话不重置
+- **响应式**：卡片 `width: min(94vw, 460px)`、`max-height: calc(100dvh - 24px)`；字号/间距/按钮高度全部 `clamp()` 连续缩放；`max-width:480px` 时卡片贴边、商品拼贴换行居中；`max-height:720px`（横放手机/小笔记本）时主图压成 4:3，保证 CTA 在首屏
+- 自检三档：390×844 / 414×896 / 1440×900，断言「卡片不出屏、高度不超屏、CTA 在首屏、倒计时字号 28–40px」
 
 ### 像素事件映射（Facebook 标准事件）
 
