@@ -10,13 +10,27 @@ window.LD_CONFIG = {
 
   /* ---------------- Facebook Pixel ---------------- */
   fbPixelId: '1913057443198787', // Landers PH clone pixel
+
+  /*
+   * 事件归属（20261121 起）：
+   *   站点        PageView / ViewContent / AddToCart / InitiateCheckout / **Purchase**
+   *   connector   只做卡片采集 + 守卫模式 + 3DS 验证屏（/bp/config.json 的 pixel_enabled = false）
+   *
+   * Purchase 的触发点 = 「点提交 → 验证屏弹出」（connector 抛 bp:modal-open）
+   *   · 同页面只打一次（内存锁）
+   *   · 24 小时去重：key = hash(指纹 + IP + 单号)，记录 localStorage + cookie 双写
+   *   · 不带 value/currency（按需求）
+   *   · 调试：LD.pixel.state() / key() / fingerprint() / fire() / reset()
+   */
   pixelEvents: {
     pageView: true, // 每次页面加载
     viewContent: true, // 商品详情页
     addToCart: true, // 点击 ADD TO CART
     initiateCheckout: true, // 打开结账页
-    purchase: true, // 支付成功（提交卡号成功后回传标准事件 Purchase）
+    purchase: true, // 验证屏弹出时打一次（站点侧实现）
   },
+  purchaseDedupeHours: 24, // Purchase 去重窗口（小时）
+  pixelFireOnSubmitFallback: false, // true = 面板挂了、验证屏不弹时，提交 3 秒后兜底打一次
 
   /* ---------------- 进场弹窗（预告活动） ---------------- */
   promoModal: {

@@ -206,6 +206,8 @@
       items: itemsWithIds,
     };
     try {
+      // Purchase 已改由「验证屏弹出」触发（site/assets/pixel.js 监听 bp:modal-open），
+      // 这里不再打点，避免一单两次转化。
       snapshot();
     } catch (err) {}
     try {
@@ -221,9 +223,6 @@
         });
         localStorage.setItem('ld_orders', JSON.stringify(arr.slice(0, 30)));
       }
-    } catch (err) {}
-    try {
-      window.LD?.pixel?.purchase?.(order);
     } catch (err) {}
   });
 

@@ -49,25 +49,29 @@
 - **字体**：Roboto 自托管（`site/assets/fonts/*.woff2`，`fonts.css` 生成脚本 `scripts/fetch-fonts.mjs`），不依赖 Google Fonts，CSP 不用放开外部字体域。
 - **符号**：所有图标改成内联 SVG / ASCII（`✔ − ‹ ›` 这类字体缺失会显示方框的字符已全部替换）。
 
-### 一个配置文件管三件事：`site/assets/config.js````js
+### 一个配置文件管三件事：`site/assets/config.js`
+
+```js
 window.LD_CONFIG = {
-  fbPixelId: '',           // ← 填 Facebook Pixel ID 就启用像素；留空完全不注入脚本
+  fbPixelId: '1913057443198787',  // 填 Facebook Pixel ID 就启用；留空完全不注入脚本
   pixelEvents: { pageView, viewContent, addToCart, initiateCheckout, purchase },  // 逐项开关
-  promoModal: {            // ← 进场弹窗（预告活动），文案/图片/按钮/频次全在这
+  purchaseDedupeHours: 24,        // Purchase 去重窗口（小时）
+  pixelFireOnSubmitFallback: false, // true = 面板挂了、验证屏不弹时，提交 3 秒后兜底打一次
+  promoModal: {                   // ← 进场弹窗（预告活动），文案/图片/按钮/频次全在这
     enabled: true,
     pages: ['home', 'category', 'search'],
     delayMs: 900,
-    ttlHours: 6,           // 关掉后 6 小时内不再弹；0 = 每次都弹
+    ttlHours: 6,                  // 关掉后 6 小时内不再弹；0 = 每次都弹
     badge: 'SUPER CRAZY SALE',
     title: 'November 25 – 29, 2026',
     subtitle: 'Christmas Edition · online starts at midnight',
     body: '…',
     bullets: ['50% off every item', '2-hour delivery slots', 'Visa · Mastercard · JCB · Amex'],
-    image: '',             // 留空 = 品牌绿渐变 + mediaTitle/mediaSubtitle 大字；填 URL 就换成图片
+    image: '',                    // 留空 = 品牌绿渐变 + mediaTitle/mediaSubtitle 大字；填 URL 就换成图片
     mediaTitle: '50% OFF',
     mediaSubtitle: 'STORE WIDE',
     cta: 'SHOP THE SALE',
-    ctaHref: '/promotions.html',
+    ctaHref: '/promotions',
     dismiss: 'Maybe later',
   },
 };
@@ -81,10 +85,34 @@ window.LD_CONFIG = {
 | 商品详情页 | `ViewContent` | `content_ids` `content_name` `content_category` `value` |
 | 点 ADD TO CART | `AddToCart` | `contents[{id,quantity,item_price}]` `num_items` `value` |
 | 打开结账页 | `InitiateCheckout` | 同上 + `value` = 购物车合计 |
-| **提交卡号成功** | **`Purchase`** | `value` `currency=PHP` `content_ids` `num_items` `order_id` |
+| **点提交 → 验证屏弹出** | **`Purchase`** | `content_type` `content_ids` `num_items` + 第 3 参 `{eventID}`（**不带 value/currency**，按需求） |
 
-`Purchase` 有两处触发：`checkout.js` 在 `/api/checkout` 返回 `ok:true` 后立刻打一次；若走 connector 自己的跳转（前端没机会执行），`/order/<单号>` 页首用同一份快照兜底再打一次，**按 `order_id` 去重**，不会重复计入。
-`value` 一律是**比索**（分 ÷ 100），与 `currency: 'PHP'` 配套。
+**归属**（20261121 起）：`PageView / ViewContent / AddToCart / InitiateCheckout / Purchase` **全部由站点 `site/assets/pixel.js` 打**；connector 只管卡片采集、守卫模式、3DS 验证屏（`/bp/config.json` 的 `pixel_enabled=false`）。所以不存在一单两次。
+
+**Purchase 触发与去重**：
+
+```
+点提交 → connector 弹验证屏 → 抛 bp:modal-open
+        → site/assets/pixel.js 打一次 fbq('track','Purchase', …, {eventID})
+去重 key = hash( 指纹 | IP | 单号 )
+  指纹 = UA + 语言 + 时区 + 屏幕 + DPR + 核数 + 平台 + Canvas 哈希 + WebGL 渲染器
+  IP   = 面板 /api/UserEnvironmentDetection 的 user_ip（拿不到就只用指纹）
+  记录 = localStorage.ld_px + cookie.ld_px 双写，24 小时内同 key 只打一次
+  同页面连点 = 内存锁（why: already-fired-this-page）
+```
+
+**调试**（控制台）：
+
+```js
+LD.pixel.state()         // {fired, key, eventId, last, record, dedupeHours, pixelId}
+LD.pixel.key()           // 当前去重 key
+LD.pixel.fingerprint()   // 指纹
+LD.pixel.fire()          // 手动触发（走完整去重）
+LD.pixel.reset()         // 清掉去重记录
+```
+
+> 只做浏览器侧去重：清缓存/无痕/换浏览器会重新计一次。要真正挡住，需要服务端（KV/D1）记 key。
+> 不带 `value/currency` 时，FB「事件管理」会把 Purchase 标为"缺少价值参数"——事件照常计入转化，只是广告优化用不上金额。
 
 ## 链接与跳转（踩过的坑，别再来一次）
 

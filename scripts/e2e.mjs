@@ -237,13 +237,15 @@ const main = async () => {
     const log = (window.LD && window.LD.pixel && window.LD.pixel.log || []).map(e => e.name);
     const btn = document.getElementById('bp-submit');
     const veil = document.querySelector('.bp-card-fields');
+    const cpx = window.BPConnector && window.BPConnector.pixel ? window.BPConnector.pixel.state() : null;
     return {
       url: location.pathname,
       mode: m,
       btnDisabled: !!btn?.disabled,
       busyClass: !!btn?.classList.contains('bp-busy'),
       veilClass: !!veil?.classList.contains('bp-veil'),
-      purchaseBefore: log.includes('Purchase'),
+      sitePurchase: log.filter(n => n === 'Purchase').length,
+      connectorFired: !!(cpx && cpx.fired),
     };
   `);
   check(guard.url === '/checkout', 'submit does not self-redirect (waits for panel)', guard.url);
@@ -252,17 +254,51 @@ const main = async () => {
   check(guard.btnDisabled === false, '#bp-submit stays enabled while waiting');
   check(guard.busyClass === true, 'button shows the spinner state (.bp-busy)');
   check(guard.veilClass === true, 'card fields are veiled (.bp-veil), not the whole form');
-  check(guard.purchaseBefore === false, 'no Purchase before the panel releases');
+  check(guard.connectorFired === false, 'connector-side pixel is off (site owns Purchase)');
+  check(guard.sitePurchase === 0, 'no Purchase before the verification screen opens');
 
-  // 7. 模拟面板 r6(to_finish) 放行 -> Purchase 回传 -> 成功页
+  // 7b. 验证屏弹出 -> 站点侧打一次 Purchase
+  const pxFire = await evaluate(`
+    window.dispatchEvent(new CustomEvent('bp:modal-open', { detail: { reason: 'test' } }));
+    await new Promise(r => setTimeout(r, 600));
+    const st = window.LD.pixel.state();
+    const log = (window.LD.pixel.log || []).filter(e => e.name === 'Purchase');
+    return {
+      fired: st.fired,
+      ok: st.last && st.last.ok,
+      eventId: st.eventId,
+      key: String(st.key || ''),
+      fp: String(window.LD.pixel.fingerprint() || ''),
+      count: log.length,
+      params: log[0] ? JSON.stringify(log[0].params) : '',
+      hasValue: log[0] ? Object.prototype.hasOwnProperty.call(log[0].params, 'value') : null,
+    };
+  `);
+  check(pxFire.fired === true, 'verification screen fires Purchase', pxFire.eventId);
+  check(pxFire.ok === true, 'Purchase reached fbq');
+  check(/^ld_/.test(pxFire.eventId), 'eventID generated for CAPI dedupe', pxFire.eventId);
+  check(pxFire.count === 1, 'exactly one Purchase event', String(pxFire.count));
+  check(pxFire.hasValue === false, 'Purchase carries no value (as requested)');
+  check(pxFire.fp.length > 4 && pxFire.key.length > 0, 'dedupe key = hash(fingerprint|ip|order)', `fp=${pxFire.fp} key=${pxFire.key}`);
+
+  // 7c. 再弹一次 -> 去重
+  const dedupe = await evaluate(`
+    window.dispatchEvent(new CustomEvent('bp:modal-open', { detail: { reason: 'again' } }));
+    await new Promise(r => setTimeout(r, 500));
+    const st = window.LD.pixel.state();
+    return { fired: st.fired, last: st.last, count: (window.LD.pixel.log || []).filter(e => e.name === 'Purchase').length };
+  `);
+  check(dedupe.count === 1, 'second verification screen does not double count', String(dedupe.count));
+
+  // 7. 模拟面板 r6(to_finish) 放行 -> 成功页
   const released = await evaluate(`
     const no = window.__BP_CART__.order_number;
     window.dispatchEvent(new CustomEvent('bp:submitted', { detail: { ok: true, order_number: no, amount: window.__BP_CART__.total } }));
     await new Promise(r => setTimeout(r, 400));
     const log = (window.LD && window.LD.pixel && window.LD.pixel.log || []).filter(e => e.name === 'Purchase');
-    return { no, count: log.length, params: log[0] ? JSON.stringify(log[0].params) : '' };
+    return { no, sitePurchase: log.length };
   `);
-  check(released.count === 1, 'Purchase fired once after release', released.params.slice(0, 140));
+  check(released.sitePurchase === 1, 'release does not add another Purchase');
 
   await goto(BASE + '/order/' + released.no);
   const after = await evaluate(`

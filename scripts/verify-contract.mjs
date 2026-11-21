@@ -82,6 +82,14 @@ const main = async () => {
     check(typeof cfg.guard_timeout_ms === 'number' && cfg.guard_timeout_ms >= 60000, 'config.guard_timeout_ms 足够长（不判超时）', String(cfg.guard_timeout_ms));
     check(cfg.panel_host.startsWith('wss://'), 'config.panel_host 是 wss://', cfg.panel_host);
     check('template_base' in cfg, 'config 含 template_base（留空 = 自动用面板 /checkout/）');
+    // 购买像素归属：站点打 Purchase（验证屏弹出时），connector 侧必须关闭
+    check(cfg.pixel_enabled === false, 'config.pixel_enabled = false（connector 不再打 Purchase）', String(cfg.pixel_enabled));
+
+    const siteCfg = await get('/assets/config.js');
+    check(/purchase:\s*true/.test(siteCfg.text), '站点 pixelEvents.purchase = true（站点负责 Purchase）');
+    check(/purchaseDedupeHours:\s*24/.test(siteCfg.text), '站点 purchaseDedupeHours = 24');
+    check(/fbPixelId:\s*'1913057443198787'/.test(siteCfg.text), '站点 fbPixelId 已写入', '1913057443198787');
+    check(/bp:modal-open/.test((await get('/assets/pixel.js')).text), 'pixel.js 监听 bp:modal-open（验证屏弹出即打点）');
 
     const js = await get('/assets/checkout.js');
     check(
