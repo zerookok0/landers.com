@@ -130,19 +130,31 @@ const main = async () => {
 
   // 2b. 进场弹窗 + 像素事件
   const pop = await evaluate(`
-    await new Promise(r => setTimeout(r, 1400));
+    await new Promise(r => setTimeout(r, 1500));
     const m = document.getElementById('ld-modal');
     const events = (window.LD && window.LD.pixel && window.LD.pixel.log || []).map(e => e.name);
+    const timer = document.getElementById('ld-promo-timer');
+    const before = timer ? timer.textContent : '';
+    await new Promise(r => setTimeout(r, 1300));
     return {
       exists: !!m,
       visible: !!(m && m.classList.contains('is-on')),
       title: m?.querySelector('#ld-modal-title')?.textContent || '',
-      cta: m?.querySelector('.ld-modal-cta')?.getAttribute('href') || '',
+      cta: m?.querySelector('.ld-promo-cta')?.getAttribute('href') || '',
+      ctaText: (m?.querySelector('.ld-promo-cta')?.textContent || '').trim(),
+      badges: m ? m.querySelectorAll('.ld-promo-badge-item').length : 0,
+      timerBefore: before,
+      timerAfter: timer ? timer.textContent : '',
       events,
     };
   `);
   check(pop.exists && pop.visible, 'promo modal pops on first visit', pop.title);
+  check(/50% OFF/i.test(pop.title), 'hero shows the 50% offer', pop.title);
   check(pop.cta.includes('/'), 'promo modal has CTA link', pop.cta);
+  check(/shop now/i.test(pop.ctaText), 'CTA label is "Shop now →"', pop.ctaText);
+  check(pop.badges === 3, 'three trust badges rendered', String(pop.badges));
+  check(/^\d{2}:\d{2}:\d{2}$/.test(pop.timerBefore), 'countdown renders HH:MM:SS', pop.timerBefore);
+  check(pop.timerAfter !== pop.timerBefore, 'countdown is ticking', `${pop.timerBefore} → ${pop.timerAfter}`);
   check(pop.events.includes('PageView'), 'pixel fired PageView', pop.events.join(','));
   check(pop.events.includes('AddToCart'), 'pixel fired AddToCart', pop.events.join(','));
 

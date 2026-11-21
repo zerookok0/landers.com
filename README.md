@@ -29,8 +29,7 @@
 | 页面 | 文件 |
 |---|---|
 | 首页 | `preview/home.png` |
-| 首页 + 进场弹窗 | `preview/home-popup.png` |
-| 类目页 | `preview/category.png` |
+| 首页 + 进场弹窗 | `preview/home-popup.png` || 类目页 | `preview/category.png` |
 | 商品页（上下结构） | `preview/product.png` |
 | 购物车 | `preview/cart.png` |
 | 结账页 | `preview/checkout.png` |\n| 结账页·等待面板 | `preview/checkout-busy.png` |
@@ -59,18 +58,29 @@ window.LD_CONFIG = {
   pixelFireOnSubmitFallback: false, // true = 面板挂了、验证屏不弹时，提交 3 秒后兜底打一次
   promoModal: {                   // ← 进场弹窗（预告活动），文案/图片/按钮/频次全在这
     enabled: true,
+    layout: 'banner',             // banner = 大图 + 信任标 + 倒计时 + 整条 CTA；simple = 纯文字卡
     pages: ['home', 'category', 'search'],
     delayMs: 900,
     ttlHours: 6,                  // 关掉后 6 小时内不再弹；0 = 每次都弹
     badge: 'SUPER CRAZY SALE',
-    title: 'November 25 – 29, 2026',
-    subtitle: 'Christmas Edition · online starts at midnight',
-    body: '…',
-    bullets: ['50% off every item', '2-hour delivery slots', 'Visa · Mastercard · JCB · Amex'],
-    image: '',                    // 留空 = 品牌绿渐变 + mediaTitle/mediaSubtitle 大字；填 URL 就换成图片
-    mediaTitle: '50% OFF',
-    mediaSubtitle: 'STORE WIDE',
-    cta: 'SHOP THE SALE',
+    heroTitle: '50% OFF',
+    heroSubtitle: 'CHRISTMAS EDITION',
+    heroNote: 'November 25 – 29, 2026 · online starts at midnight',
+    image: '',                    // 留空 = 品牌绿渐变 + 大字；填图片 URL 就铺满顶部
+    brands: ['LANDERS', 'SELECTION', 'CAPITAL CARE'],
+    badges: [                     // 三条信任标（icon: shield / truck / support / gift / tag）
+      { icon: 'shield', text: '100% Authentic' },
+      { icon: 'truck', text: 'Same-day delivery' },
+      { icon: 'support', text: 'Care 7am – 9pm' },
+    ],
+    countdown: {
+      enabled: true,
+      label: 'Offer ends in',
+      durationMs: 3600000,        // 1 小时
+      persist: 'session',         // session = 本次会话内不重置；none = 每次打开都从头计
+      onExpire: 'keep',           // keep = 停在 00:00:00；close = 自动关闭弹窗
+    },
+    cta: 'Shop now',
     ctaHref: '/promotions',
     dismiss: 'Maybe later',
   },

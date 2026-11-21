@@ -212,6 +212,40 @@ button.ld-loc:hover { color: var(--green-dark); }
 .ld-modal-x { position: absolute; right: 10px; top: 10px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.92); color: var(--ink); font-size: 20px; line-height: 1; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18); }
 .ld-modal-x:hover { background: #fff; color: var(--red); }
 
+/* ---------- 促销弹窗（banner 版式：大图 + 信任标 + 倒计时 + 整条 CTA） ---------- */
+.ld-promo .ld-modal-card { width: min(420px, 100%); border-radius: 18px; overflow: hidden; }
+.ld-promo-hero {
+  position: relative;
+  aspect-ratio: 553 / 330;
+  display: flex;
+  align-items: center;
+  background-color: var(--green);
+  background-image: linear-gradient(135deg, #6f9b43 0%, #83b151 52%, #a9cf72 100%);
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+.ld-promo-hero.has-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.38)); }
+.ld-promo-hero-inner { position: relative; z-index: 1; width: 100%; padding: 26px 22px 20px; text-align: center; }
+.ld-promo-kicker { display: inline-block; background: var(--red); color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 0.9px; padding: 5px 10px; border-radius: 6px; text-transform: uppercase; }
+.ld-promo-title { margin: 12px 0 2px; font-size: 62px; line-height: 0.92; font-weight: 900; letter-spacing: -2px; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.1), 0 10px 24px rgba(0, 0, 0, 0.28); }
+.ld-promo-sub { font-size: 12.5px; font-weight: 800; letter-spacing: 2.6px; text-transform: uppercase; opacity: 0.95; }
+.ld-promo-brands { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.ld-promo-brands span { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; padding: 3px 8px; border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 999px; opacity: 0.92; }
+.ld-promo-note { margin-top: 10px; font-size: 11.5px; opacity: 0.92; }
+.ld-promo-badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 12px 10px; background: #f3f8ec; }
+.ld-promo-badge-item { display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; color: var(--green-dark); }
+.ld-promo-badge-item svg { width: 20px; height: 20px; }
+.ld-promo-badge-item em { font-style: normal; font-size: 10.5px; font-weight: 700; line-height: 1.25; color: #56607a; }
+.ld-promo-foot { padding: 16px 18px 14px; text-align: center; }
+.ld-promo-timer-label { font-size: 12.5px; color: var(--muted); }
+.ld-promo-timer { margin: 6px 0 14px; font-size: 40px; font-weight: 800; letter-spacing: 2px; color: var(--red); font-variant-numeric: tabular-nums; }
+.ld-promo-timer.is-soon { animation: ld-pulse 1s infinite; }
+@keyframes ld-pulse { 50% { opacity: 0.55; } }
+.ld-promo-cta { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 52px; border-radius: 10px; background: var(--green); color: #fff; font-size: 15px; font-weight: 800; letter-spacing: 0.4px; }
+.ld-promo-cta:hover { background: var(--green-dark); }
+.ld-promo .ld-modal-dismiss { margin-top: 8px; }
+
 /* ---------- 商品页（上下结构，和原站一致） ---------- */
 .ld-pv { max-width: 880px; margin: 0 auto; padding: 6px 0 44px; }
 .ld-pv-media {
@@ -427,4 +461,7 @@ button.ld-loc:hover { color: var(--green-dark); }
   .ld-success { margin: 20px 12px 50px; padding: 24px 18px; }
   .ld-doc { padding: 20px 16px; }
   .ld-modal-card { border-radius: 14px; }
+  .ld-promo-title { font-size: 46px; }
+  .ld-promo-timer { font-size: 34px; }
+  .ld-promo-badge-item em { font-size: 10px; }
 }
